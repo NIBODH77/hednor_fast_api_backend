@@ -1,0 +1,35 @@
+  await app(scope, receive, sender)
+  File "/home/nibodh/Documents/odh_reception_panel/venv/lib/python3.12/site-packages/fastapi/routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/nibodh/Documents/odh_reception_panel/venv/lib/python3.12/site-packages/fastapi/routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nibodh/Documents/odh_reception_panel/venv/lib/python3.12/site-packages/fastapi/routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nibodh/Documents/odh_reception_panel/app/main.py", line 2681, in admin_employees_edit
+    return admin_templates.TemplateResponse(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nibodh/Documents/odh_reception_panel/venv/lib/python3.12/site-packages/starlette/templating.py", line 210, in TemplateResponse
+    return _TemplateResponse(
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/nibodh/Documents/odh_reception_panel/venv/lib/python3.12/site-packages/starlette/templating.py", line 41, in __init__
+    content = template.render(context)
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nibodh/Documents/odh_reception_panel/venv/lib/python3.12/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/home/nibodh/Documents/odh_reception_panel/venv/lib/python3.12/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "frontend/admin/templates/employee_edit.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "frontend/admin/templates/base.html", line 245, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "frontend/admin/templates/employee_edit.html", line 20, in block 'content'
+    <option {{ 'selected' if item.gender.value==g else '' }}>{{ g }}</option>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/nibodh/Documents/odh_reception_panel/venv/lib/python3.12/site-packages/jinja2/environment.py", line 490, in getattr
+    return getattr(obj, attribute)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+jinja2.exceptions.UndefinedError: 'dict object' has no attribute 'gender'
