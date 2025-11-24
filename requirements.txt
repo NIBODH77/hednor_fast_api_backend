@@ -44,3 +44,4 @@ python-multipart
 pytz
 sqlalchemy
 uvicorn
+pydantic-settings
