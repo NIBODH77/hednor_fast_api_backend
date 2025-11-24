@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Receptionist Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2c3e50',
+            secondary: '#3498db',
+            accent: '#e74c3c',
+            light: '#ecf0f1',
+            dark: '#2c3e50',
+            success: '#2ecc71',
+            warning: '#f39c12',
+            info: '#17a2b8',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      width: 100%;
+      max-width: 400px;
+    }
+    .login-header {
+      background: linear-gradient(to right, #2c3e50, #3498db);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    .login-form { padding: 2rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151; }
+    input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      transition: all 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    .btn-login {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(to right, #2c3e50, #3498db);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+    .remember-forgot { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .remember { display: flex; align-items: center; gap: 0.5rem; }
+    .forgot-password { color: #3498db; text-decoration: none; font-size: 0.875rem; }
+    .forgot-password:hover { text-decoration: underline; }
+    .error-message { color: #e74c3c; font-size: 0.875rem; margin-top: 0.5rem; display: none; }
+    .login-footer { text-align: center; padding-top: 1.5rem; border-top: 1px solid #e5e7eb; margin-top: 1.5rem; color: #6b7280; font-size: 0.875rem; }
+    .login-footer a { color: #3498db; text-decoration: none; }
+    .login-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="login-header">
+      <div class="flex justify-center mb-4">
+        <div class="w-16 h-16 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+          <i class="fas fa-user-lock text-3xl text-white"></i>
+        </div>
+      </div>
+      <h1 class="text-2xl font-bold">Log In</h1>
+      <p class="text-white text-opacity-80 mt-2">Sign in to your account</p>
+    </div>
+    
+    <div class="login-form">
+      <form id="loginForm" method="post" action="/login" autocomplete="off">
+        {% if error %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {{ error }}
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" 
+                 placeholder="Enter your username" 
+                 required 
+                 autocomplete="off"
+                 autocapitalize="off" 
+                 autocorrect="off" 
+                 spellcheck="false">
+          <div class="error-message" id="usernameError">Please enter a valid username</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" 
+                 placeholder="Enter your password" 
+                 required 
+                 autocomplete="new-password">
+          <div class="error-message" id="passwordError">Please enter your password</div>
+        </div>
+        
+        <div class="remember-forgot">
+          <div class="remember">
+            <input type="checkbox" id="remember" name="remember">
+            <label for="remember" class="mb-0 text-sm">Remember me</label>
+          </div>
+          <a href="#" class="forgot-password">Forgot password?</a>
+        </div>
+        
+        <button type="submit" class="btn-login">
+          <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+        </button>
+      </form>
+      
+      <div class="login-footer">
+        <p>Don't have an account? <a href="#">Contact Administrator</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Auto-refresh once on first load
+    window.addEventListener('load', function () {
+      if (!sessionStorage.getItem('pageRefreshed')) {
+        sessionStorage.setItem('pageRefreshed', 'true');
+        location.reload();
+      } else {
+        sessionStorage.removeItem('pageRefreshed');
+      }
+
+      // ✅ Always clear fields to prevent autofill
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+    });
+
+    // ✅ Simple form validation
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      let isValid = true;
+      const username = document.getElementById('username');
+      const password = document.getElementById('password');
+
+      if (!username.value.trim()) {
+        document.getElementById('usernameError').style.display = 'block';
+        isValid = false;
+      } else {
+        document.getElementById('usernameError').style.display = 'none';
+      }
+      
+      if (!password.value) {
+        document.getElementById('passwordError').style.display = 'block';
+        isValid = false;
+      } else {
+        document.getElementById('passwordError').style.display = 'none';
+      }
+
+      if (!isValid) e.preventDefault();
+    });
+  </script>
+</body>
+</html>

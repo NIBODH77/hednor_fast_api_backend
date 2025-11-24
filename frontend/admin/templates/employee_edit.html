@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Edit Employee{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Edit: {{ item.full_name }}</h2>
+
+<form action="/admin/employees/{{ item.id }}/edit" method="post" enctype="multipart/form-data" class="space-y-4 bg-white p-4 rounded-xl">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm">Full Name</label>
+      <input name="full_name" value="{{ item.full_name }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm">DOB</label>
+      <input type="date" name="dob" value="{{ item.dob }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm">Gender</label>
+      <select name="gender" class="w-full border rounded px-3 py-2">
+        {% for g in ['Male','Female','Other','Prefer not to say'] %}
+          <option {{ 'selected' if item.gender.value==g else '' }}>{{ g }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm">Phone</label>
+      <input name="phone" value="{{ item.phone }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div class="sm:col-span-2">
+      <label class="block text-sm">Email</label>
+      <input name="email" value="{{ item.email }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm">Aadhaar</label>
+      <input name="aadhaar_number" value="{{ item.aadhaar_number }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm">PAN</label>
+      <input name="pan_number" value="{{ item.pan_number or '' }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div class="sm:col-span-2">
+      <label class="block text-sm">Address</label>
+      <textarea name="address" class="w-full border rounded px-3 py-2">{{ item.address }}</textarea>
+    </div>
+    <div>
+      <label class="block text-sm">Emergency Name</label>
+      <input name="emergency_name" value="{{ item.emergency_name }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm">Emergency Relation</label>
+      <input name="emergency_relation" value="{{ item.emergency_relation }}" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm">Emergency Phone</label>
+      <input name="emergency_phone" value="{{ item.emergency_phone }}" class="w-full border rounded px-3 py-2">
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm">Upload Aadhaar (optional)</label>
+      <input type="file" name="aadhaar_files" multiple accept=".jpg,.jpeg,.png,.pdf" class="w-full border rounded px-3 py-2">
+    </div>
+    <div>
+      <label class="block text-sm">Upload PAN (optional)</label>
+      <input type="file" name="pan_file" accept=".jpg,.jpeg,.png,.pdf" class="w-full border rounded px-3 py-2">
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-3">
+    <a href="/admin/employees" class="px-4 py-2 border rounded">Cancel</a>
+    <button class="px-4 py-2 bg-green-600 text-white rounded">Save</button>
+  </div>
+</form>
+{% endblock %}

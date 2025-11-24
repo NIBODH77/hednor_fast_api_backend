@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Receptionist Dashboard{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
+  <h2 class="text-xl sm:text-2xl font-semibold text-dark">
+    Welcome, {{ current_user.username }}!
+  </h2>
+  <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+    <div
+      class="bg-white/30 backdrop-blur-md p-3 rounded-xl shadow-md border border-white/30 w-full lg:w-auto flex items-center justify-between">
+      <div class="flex items-center">
+        <i class="fas fa-calendar text-secondary mr-2"></i>
+        <span id="current-date">{{ current_date|default('Monday, October 16, 2023') }}</span>
+      </div>
+      <span class="mx-2">|</span>
+      <div class="flex items-center">
+        <i class="fas fa-clock text-secondary mr-2"></i>
+        <span id="current-time">{{ current_time|default('10:30:45 AM') }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-grid mb-8 grid grid-cols-1 sm:grid-cols-3 gap-5">
+  <!-- Today's Visitors -->
+  <div
+    class="bg-gradient-to-r from-purple-500/80 via-pink-500/80 to-red-500/80 text-white p-5 rounded-xl shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300">
+    <div class="flex justify-between items-center mb-4">
+      <div class="font-medium">Today's Visitors</div>
+      <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+        <i class="fas fa-user-friends"></i>
+      </div>
+    </div>
+    <div id="today-visitors" class="text-3xl font-bold mb-1">
+      {{ today_visitors }}
+    </div>
+    <div class="text-white/80 text-sm">Today Visitors</div>
+  </div>
+
+  <!-- Total Visitors -->
+  <div
+    class="bg-gradient-to-r from-indigo-500/80 via-sky-500/80 to-cyan-500/80 text-white p-5 rounded-xl shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300">
+    <div class="flex justify-between items-center mb-4">
+      <div class="font-medium">Total Visitors</div>
+      <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+        <i class="fas fa-clock"></i>
+      </div>
+    </div>
+    <div id="waiting-visitors" class="text-3xl font-bold mb-1">
+      {{ total_visitors }}
+    </div>
+    <div class="text-white/80 text-sm">Visitors Up To Now</div>
+  </div>
+
+  <!-- Appointments -->
+  <div
+    class="bg-gradient-to-r from-green-500/80 via-emerald-500/80 to-teal-500/80 text-white p-5 rounded-xl shadow-md hover:shadow-xl hover:scale-105 transition-all duration-300">
+    <div class="flex justify-between items-center mb-4">
+      <div class="font-medium">Appointments</div>
+      <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+        <i class="fas fa-user-check"></i>
+      </div>
+    </div>
+    <div id="checkedin-visitors" class="text-3xl font-bold mb-1">
+      {{ apointment_visitors }}
+    </div>
+    <div class="text-white/80 text-sm">Scheduled Appointments</div>
+  </div>
+</div>
+
+<!-- Recent Visitors Table -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+  <div class="bg-white/30 backdrop-blur-md p-5 rounded-xl shadow-md border border-white/30 lg:col-span-2">
+    <!-- Header -->
+    <div class="flex justify-between items-center pb-3 border-b border-gray-200 mb-4">
+      <h3 class="text-lg font-semibold bg-gradient-to-r from-purple-500 to-red-500 bg-clip-text text-transparent">
+        Recent Visitors
+      </h3>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-y-auto overflow-x-auto bg-white rounded-xl shadow-sm custom-scrollbar"
+      style="max-height: 400px;">
+<table class="w-full table-auto text-sm text-left border-collapse min-w-[900px]">
+        <thead class="bg-gradient-to-r from-purple-500 to-pink-500 text-white sticky top-0 z-10">
+          <tr>
+            <th class="w-1/6 py-3 px-4 rounded-tl-lg">Name</th>
+            <th class="w-1/6 py-3 px-4">Phone</th>
+            <th class="w-1/6 py-3 px-4">To Meet</th>
+            <th class="w-1/6 py-3 px-4">Purpose</th>
+            <th class="w-1/6 py-3 px-4">City</th>
+            <th class="w-1/6 py-3 px-4">State</th>
+            <th class="w-1/6 py-3 px-4">Check-In</th>
+            <th class="w-1/6 py-3 px-4">Check-Out</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {% for visitor in recent_visitors %}
+          <tr class="hover:bg-gray-50 transition" data-id="{{ visitor.id }}">
+            <td class="py-3 px-4 font-medium text-dark whitespace-nowrap">{{ visitor.masked_name }}</td>
+            <td class="py-3 px-4 text-gray-600 whitespace-nowrap">{{ visitor.masked_phone }}</td>
+            <td class="py-3 px-4 text-gray-600 whitespace-nowrap">{{ visitor.host }}</td>
+            <td class="py-3 px-4 text-gray-600 whitespace-nowrap">{{ visitor.purpose }}</td>
+            <td class="py-3 px-4 text-gray-600 whitespace-nowrap">{{ visitor.city }}</td>
+            <td class="py-3 px-4 text-gray-600 whitespace-nowrap">{{ visitor.state }}</td>
+            <td class="py-3 px-4 text-gray-600">{{ visitor.check_in_time }}</td>
+            <td class="py-3 px-4 text-gray-600">{{ visitor.check_out_time }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="py-4 px-4 text-center text-gray-500 italic">
+              No visitors found
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Header Date/Time update
+  function updateDateTime() {
+    const now = new Date();
+    document.getElementById('current-date').textContent =
+      now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US');
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+</script>
+
+
+
+
+{% endblock %}

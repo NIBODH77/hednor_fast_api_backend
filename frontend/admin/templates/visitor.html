@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Visitors Management - Receptionist Panel{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+
+  <!-- Header + DateTime -->
+  <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+    <h2 class="text-xl sm:text-2xl font-semibold text-dark">Welcome, {{ current_user.username }}!</h2>
+    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+      <div class="bg-white p-3 rounded-lg shadow-sm flex flex-wrap items-center justify-between w-full lg:w-auto">
+        <div class="flex items-center text-sm sm:text-base">
+          <i class="fas fa-calendar text-secondary mr-2"></i>
+          <span id="current-date">{{ current_date }}</span>
+        </div>
+        <span class="hidden sm:inline mx-2">|</span>
+        <div class="flex items-center text-sm sm:text-base mt-2 sm:mt-0">
+          <i class="fas fa-clock text-secondary mr-2"></i>
+          <span id="current-time">{{ current_time }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs + Export Buttons -->
+  <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4 w-full">
+    <!-- All Visitors Button -->
+    <button class="tab px-6 py-2 text-sm sm:text-base font-semibold text-white 
+      bg-gradient-to-r from-purple-600/60 via-pink-600/60 to-red-600/60 
+      backdrop-blur-xl border border-white/30 
+      rounded-2xl shadow-lg 
+      hover:from-purple-500/80 hover:via-pink-500/80 hover:to-red-500/80 
+      hover:border-white/50 hover:shadow-2xl hover:scale-105 
+      transition-all duration-300 ease-in-out text-center flex-1 sm:flex-none" data-tab="all">
+      All Visitors
+    </button>
+
+    <!-- Export Buttons -->
+    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+      <button id="export-current-btn"
+        class="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+        Export Current Page CSV
+      </button>
+
+      <button id="export-all-btn"
+        class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+        Export All Data CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="flex justify-end mb-4">
+    <input type="text" id="search-input" placeholder="Search visitors..."
+      class="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary">
+  </div>
+
+  <!-- All Visitors Table -->
+  <div class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6" id="all-tab">
+    <div class="bg-white p-5 rounded-xl shadow-sm lg:col-span-2">
+
+      <!-- Table Wrapper -->
+<div class="overflow-x-auto overflow-y-auto bg-white rounded-xl shadow-md custom-scrollbar" 
+     style="max-height: 450px;">
+  <table id="visitors-table" class="w-full min-w-[950px] text-sm border-collapse">
+    <!-- Table Head -->
+    <thead class="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white sticky top-0 z-10 text-xs uppercase tracking-wide">
+      <tr>
+        <th class="py-3 px-4 text-left rounded-tl-lg">Name</th>
+        <th class="py-3 px-4 text-left">Phone</th>
+        <th class="py-3 px-4 text-left">To Meet</th>
+        <th class="py-3 px-4 text-center">Purpose</th>
+        <th class="py-3 px-4 text-left">City</th>
+        <th class="py-3 px-4 text-center">State</th>
+        <th class="py-3 px-4 text-center rounded-tr-lg">Check-In</th>
+        <th class="py-3 px-4 text-center rounded-tr-lg">Check-Out</th>
+      </tr>
+    </thead>
+
+    <!-- Table Body -->
+    <tbody class="divide-y divide-gray-200 text-gray-700">
+      {% for visitor in all_visitors %}
+      <tr class="hover:bg-gradient-to-r hover:from-purple-50 hover:via-pink-50 hover:to-red-50 transition duration-200 ease-in-out">
+        <td class="py-3 px-4 font-medium text-gray-900">{{ visitor.name }}</td>
+        <td class="py-3 px-4">{{ visitor.phone }}</td>
+        <td class="py-3 px-4">{{ visitor.host }}</td>
+        <td class="py-3 px-4 text-center">{{ visitor.purpose }}</td>
+        <td class="py-3 px-4">{{ visitor.city }}</td>
+        <td class="py-3 px-4 text-center">{{ visitor.state }}</td>
+        <td class="py-3 px-4 text-center font-semibold text-purple-600">{{ visitor.check_in_time }}</td>
+        <td class="py-3 px-4 text-center font-semibold text-purple-600">{{ visitor.check_out_time }}</td>
+
+      </tr>
+      {% else %}
+      <tr class="bg-gray-50">
+        <td colspan="7" class="py-4 px-4 text-center text-gray-500 italic">
+          No visitors found
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+      <!-- Pagination -->
+      <!-- <div class="flex justify-between items-center mt-4">
+        <button id="prev-btn" class="px-3 py-1 bg-gray-200 rounded disabled:opacity-50">Previous</button>
+        <span id="page-info" class="text-sm text-gray-600"></span>
+        <button id="next-btn" class="px-3 py-1 bg-gray-200 rounded disabled:opacity-50">Next</button>
+      </div> -->
+
+
+
+      <!-- Pagination -->
+      <div class="flex justify-center items-center mt-6 space-x-6">
+
+        <!-- Prev Button -->
+        <button id="prev-btn" class="px-5 py-2 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-500 text-white font-semibold shadow-xl backdrop-blur-md bg-opacity-80 
+           hover:scale-105 hover:shadow-2xl hover:from-violet-700 hover:to-purple-600 transition-all duration-300 ease-in-out 
+           disabled:opacity-40 disabled:cursor-not-allowed">
+          ⬅ Prev
+        </button>
+
+        <!-- Page Info Badge -->
+        <span id="page-info" class="px-4 py-2 rounded-xl text-sm font-bold text-violet-800 bg-white/30 shadow-lg backdrop-blur-md border border-violet-200 
+           animate-pulse">
+          Page 1 of 5
+        </span>
+
+        <!-- Next Button -->
+        <button id="next-btn" class="px-5 py-2 rounded-2xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-semibold shadow-xl backdrop-blur-md bg-opacity-80 
+           hover:scale-105 hover:shadow-2xl hover:from-purple-600 hover:to-violet-700 transition-all duration-300 ease-in-out 
+           disabled:opacity-40 disabled:cursor-not-allowed">
+          Next ➡
+        </button>
+
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    // Tabs
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+      document.getElementById(tabName + '-tab').classList.remove('hidden');
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('border-secondary', 'text-secondary'));
+      document.querySelector('.tab[data-tab="' + tabName + '"]').classList.add('border-secondary', 'text-secondary');
+    }
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab')));
+    });
+
+    // Pagination + Search
+    const rowsPerPage = 8;
+    let currentPage = 1;
+    const table = document.getElementById("visitors-table");
+    const allRows = Array.from(table.querySelectorAll("tbody tr")).filter(r => !r.classList.contains("no-data"));
+    const noDataRow = table.querySelector("tbody tr.no-data");
+    let filteredRows = [...allRows];
+    const totalPages = () => Math.ceil(filteredRows.length / rowsPerPage) || 1;
+
+    function renderTable() {
+      if (filteredRows.length === 0) {
+        if (noDataRow) noDataRow.style.display = "";
+        document.getElementById("page-info").textContent = "No data";
+        document.getElementById("prev-btn").disabled = true;
+        document.getElementById("next-btn").disabled = true;
+        return;
+      }
+
+      filteredRows.forEach((row, index) => {
+        row.style.display =
+          (index >= (currentPage - 1) * rowsPerPage && index < currentPage * rowsPerPage) ? "" : "none";
+      });
+
+      allRows.forEach(r => { if (!filteredRows.includes(r)) r.style.display = "none"; });
+      if (noDataRow) noDataRow.style.display = "none";
+
+      document.getElementById("page-info").textContent = `Page ${currentPage} of ${totalPages()}`;
+      document.getElementById("prev-btn").disabled = currentPage === 1;
+      document.getElementById("next-btn").disabled = currentPage === totalPages();
+    }
+
+    document.getElementById("prev-btn").addEventListener("click", () => {
+      if (currentPage > 1) { currentPage--; renderTable(); }
+    });
+
+    document.getElementById("next-btn").addEventListener("click", () => {
+      if (currentPage < totalPages()) { currentPage++; renderTable(); }
+    });
+
+    document.getElementById("search-input").addEventListener("input", function () {
+      const query = this.value.toLowerCase();
+      filteredRows = allRows.filter(row => row.textContent.toLowerCase().includes(query));
+      currentPage = 1;
+      renderTable();
+    });
+
+    // Update header Date & Time
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById('current-date').textContent =
+        now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US');
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    // Open "All" tab by default
+    switchTab('all');
+    renderTable();
+  });
+
+  // Export CSV
+  function generateCSV(rows) {
+    let csv = [];
+    rows.forEach(row => {
+      let cols = row.querySelectorAll("th, td");
+      let rowData = [];
+      cols.forEach(col => rowData.push('"' + col.innerText.replace(/\n/g, " ").trim().replace(/"/g, '""') + '"'));
+      csv.push(rowData.join(","));
+    });
+    return csv.join("\n");
+  }
+
+  document.getElementById("export-current-btn").addEventListener("click", () => {
+    const visibleRows = Array.from(document.querySelectorAll("#visitors-table tbody tr"))
+      .filter(row => row.style.display !== "none");
+    const headerRow = document.querySelectorAll("#visitors-table thead tr");
+    const csvContent = generateCSV([...headerRow, ...visibleRows]);
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "visitors_current_page.csv";
+    link.click();
+  });
+
+  document.getElementById("export-all-btn").addEventListener("click", () => {
+    const allRows = document.querySelectorAll("#visitors-table tr");
+    const csvContent = generateCSV(allRows);
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "visitors_all_data.csv";
+    link.click();
+  });
+</script>
+{% endblock %}
