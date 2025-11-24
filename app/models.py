@@ -1,194 +1,123 @@
-# from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-# from sqlalchemy.orm import relationship
-# from app.database import Base
-# from datetime import datetime
-# from sqlalchemy.sql import func
-
-
-# class User(Base):
-#     __tablename__ = "users"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     username = Column(String, unique=True, index=True, nullable=False)
-#     password_hash = Column(String, nullable=False)
-#     role = Column(String, nullable=False, default="reception")  # "admin" or "reception"
-    
-#     visitors = relationship("Visitor", back_populates="creator")
-
-
-# # class Visitor(Base):
-# #     __tablename__ = "visitors"
-
-# #     id = Column(Integer, primary_key=True, index=True)
-# #     name = Column(String, nullable=False)
-# #     company = Column(String, nullable=True)
-# #     email = Column(String, nullable=True)
-# #     phone = Column(String, nullable=True)
-# #     host = Column(String, nullable=True)
-# #     purpose = Column(String, nullable=True)
-# #     status = Column(String, default="checked-in")
-# #     check_in_time = Column(DateTime, default=datetime.utcnow)
-# #     check_out_time = Column(DateTime, nullable=True)
-
-# #     created_by = Column(Integer, ForeignKey("users.id"))
-# #     creator = relationship("User", back_populates="visitors")
-
-
-
-
-
-
-
-
-# class Visitor(Base):
-#     __tablename__ = "visitors"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String, nullable=False)
-#     company = Column(String)
-#     email = Column(String)
-#     phone = Column(String)
-#     host = Column(String)
-#     purpose = Column(String)
-#     status = Column(String, default="pending")
-#     check_in_time = Column(DateTime(timezone=True), server_default=func.now())
-#     check_out_time = Column(DateTime(timezone=True), nullable=True)
-#     created_at = Column(DateTime(timezone=True), server_default=func.now())
-#     created_by = Column(String, nullable=True)
-
-
-#     # 👇 Extra helpers for template
-#     @property
-#     def initials(self):
-#         """Get initials from name (e.g., John Doe → JD)."""
-#         if not self.name:
-#             return ""
-#         return "".join([part[0].upper() for part in self.name.split() if part])
-
-#     @property
-#     def duration(self):
-#         """Get duration of visit (check-out - check-in)."""
-#         end_time = self.check_out_time or datetime.utcnow()
-#         if not self.check_in_time:
-#             return "-"
-#         delta = end_time - self.check_in_time
-#         minutes = delta.total_seconds() // 60
-#         if minutes < 60:
-#             return f"{int(minutes)} mins"
-#         hours, mins = divmod(int(minutes), 60)
-#         return f"{hours}h {mins}m"
-
-
-
-
-
-
-
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Table, DateTime, func
 from sqlalchemy.orm import relationship
 from app.database import Base
 from datetime import datetime
-from sqlalchemy.sql import func
+from pathlib import Path
 
+# Association table for many-to-many relationship between Category and Brand
+category_brand_association = Table(
+    'category_brand_association',
+    Base.metadata,
+    Column('category_id', Integer, ForeignKey('categories.id')),
+    Column('brand_id', Integer, ForeignKey('brands.id'))
+)
 
-class User(Base):
-    __tablename__ = "users"
+class Category(Base):
+    __tablename__ = 'categories'
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-    role = Column(String, nullable=False, default="reception")
+    name = Column(String(100), nullable=False)
+    slug = Column(String(100), unique=True, index=True)
+    description = Column(String(500), nullable=True)
+    is_active = Column(Boolean, default=True)
+    is_leaf = Column(Boolean, default=False)  # Indicates if category has no children
+    parent_id = Column(Integer, ForeignKey('categories.id'), nullable=True)  # Simple parent-child hierarchy
+    
+    # Self-referential relationships for hierarchy
+    parent = relationship("Category", remote_side="Category.id", backref="children")
+    parent_relationships = relationship(
+        "CategoryRelationship",
+        foreign_keys="[CategoryRelationship.descendant_id]",
+        back_populates="descendant"
+    )
+    child_relationships = relationship(
+        "CategoryRelationship",
+        foreign_keys="[CategoryRelationship.ancestor_id]",
+        back_populates="ancestor"
+    )
+    
+    # Many-to-many with Brand
+    brands = relationship(
+        "Brand",
+        secondary=category_brand_association,
+        back_populates="categories"
+    )
+    
+    # Products in this category
+    products = relationship("Product", back_populates="category")
 
-    visitors = relationship(
-        "Visitor",
-        back_populates="creator",
-        cascade="all, delete"
+class CategoryRelationship(Base):
+    __tablename__ = 'category_relationships'
+    
+    ancestor_id = Column(Integer, ForeignKey('categories.id'), primary_key=True)
+    descendant_id = Column(Integer, ForeignKey('categories.id'), primary_key=True)
+    depth = Column(Integer, nullable=False)
+    
+    ancestor = relationship(
+        "Category",
+        foreign_keys=[ancestor_id],
+        back_populates="child_relationships"
+    )
+    descendant = relationship(
+        "Category",
+        foreign_keys=[descendant_id],
+        back_populates="parent_relationships"
     )
 
-
-
-
-
-# class Visitor(Base):
-#     __tablename__ = "visitors"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String,nullable=True)
-#     # company = Column(String, nullable=True)
-#     # email = Column(String, nullable=True)
-#     phone = Column(String)
-#     host = Column(String, nullable=True)
-#     purpose = Column(String, nullable=True)
-#     # check_in_time = Column(DateTime(timezone=True), server_default=func.now())
-#     state = Column(String)
-#     city = Column(String)
-#     check_in_time = Column(DateTime, server_default=func.now())   # Jab visitor enter karega
-#     check_out_time = Column(DateTime, nullable=True)              # Jab visitor niklega (default null)
-#     status = Column(String(20), default="checked_in")  
-#     # address = Column(String, nullable=True)
-#     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-#     created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-#     creator = relationship("User", back_populates="visitors")
-
-
-
-class Visitor(Base):
-    __tablename__ = "visitors"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=True)
-    phone = Column(String, nullable=False)
-    host = Column(String, nullable=True)
-    purpose = Column(String, nullable=True)
-    state = Column(String, nullable=True)
-    city = Column(String, nullable=True)
-
-    # Appointment / Check-in times
-    check_in_time = Column(DateTime, server_default=func.now())   # scheduled ya actual check-in
-    check_out_time = Column(DateTime, nullable=True)
-
-    # Status: scheduled, checked_in, checked_out, cancelled
-    status = Column(String(20), default="scheduled")
-
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    creator = relationship("User", back_populates="visitors")
-
-
-
-class OTP(Base):
-    __tablename__ = "otps"
-
-    id = Column(Integer, primary_key=True, index=True)
-    otp_code = Column(String, nullable=False)   # OTP value
-    visitor_id = Column(Integer, ForeignKey("visitors.id"), nullable=True)
-    is_verified = Column(Boolean, default=False)  # ✅ Add this
-
-    visitor = relationship("Visitor", backref="otps")
-
-
-class Employee(Base):
-    __tablename__ = "employees"
-
-    id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, nullable=False)
-    dob = Column(String, nullable=True)
-    gender = Column(String, nullable=True)
-    phone = Column(String, nullable=True)
-    email = Column(String, nullable=True)
-    aadhaar_number = Column(String, nullable=True)
-    pan_number = Column(String, nullable=True)
-    address = Column(String, nullable=True)
-    emergency_name = Column(String, nullable=True)
-    emergency_relation = Column(String, nullable=True)
-    emergency_phone = Column(String, nullable=True)
+class Brand(Base):
+    __tablename__ = 'brands'
     
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    slug = Column(String(100), unique=True, index=True)
+    description = Column(String(500), nullable=True)
+    is_active = Column(Boolean, default=True)
     
-    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    creator = relationship("User")
+    # Many-to-many with Category
+    categories = relationship(
+        "Category",
+        secondary=category_brand_association,
+        back_populates="brands"
+    )
+    
+    # Products for this brand
+    products = relationship("Product", back_populates="brand")
 
 
+class Product(Base):
+    __tablename__ = 'products'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(200), nullable=False)
+    slug = Column(String(200), unique=True, index=True)
+    description = Column(String(1000), nullable=True)
+    price = Column(Float, nullable=False)
+    selling_price = Column(Float, nullable=True)  # Discounted price
+    discount = Column(Float, nullable=True)  # Discount percentage
+    quantity = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    image_path = Column(String(500), nullable=True)  # Store file path
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    
+    # Relationships
+    category_id = Column(Integer, ForeignKey('categories.id'))
+    category = relationship("Category", back_populates="products")
+    
+    brand_id = Column(Integer, ForeignKey('brands.id'))
+    brand = relationship("Brand", back_populates="products")
+    
+    @property
+    def image_url(self):
+        if self.image_path:
+            return f"/uploads/products/{self.image_path}"
+        return None
+    
+    # Convenience properties
+    @property
+    def category_name(self):
+        return self.category.name if self.category else None
+    
+    @property
+    def brand_name(self):
+        return self.brand.name if self.brand else None

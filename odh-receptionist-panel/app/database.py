@@ -1,11 +1,11 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from urllib.parse import urlparse, parse_qs
 
-# Get DATABASE_URL from environment or use default
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:123456789@localhost:5432/hednor_db"
+    "postgresql+asyncpg://postgres:nibodh%40123@localhost/odhreceptiondb"
 )
 
 # Clean up URL for asyncpg
@@ -18,12 +18,12 @@ if "?" in DATABASE_URL:
     DATABASE_URL = base_url
 
 # Configure SSL for cloud database connections (Neon, AWS RDS, etc.)
+# Use proper SSL verification for production security
 connect_args = {}
 if "neon.tech" in DATABASE_URL or "rds.amazonaws.com" in DATABASE_URL:
     # For asyncpg, simply use ssl=True to enable SSL with proper certificate validation
     connect_args = {"ssl": True}
 
-# Create async engine
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
@@ -31,7 +31,6 @@ engine = create_async_engine(
     connect_args=connect_args
 )
 
-# Create async session factory
 AsyncSessionLocal = sessionmaker(
     bind=engine,
     class_=AsyncSession,
@@ -40,15 +39,15 @@ AsyncSessionLocal = sessionmaker(
     autocommit=False
 )
 
-# Base class for models
 Base = declarative_base()
 
-# Async database dependency
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
 
-# Initialize database tables
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+def get_target_metadata():
+    return Base.metadata
