@@ -35,7 +35,7 @@ async def create_brand(brand: schemas.BrandCreate, db: AsyncSession = Depends(ge
     return db_brand
 
 # READ
-@router.get("/", response_model=List[schemas.BrandWithCategories])
+@router.get("/", response_model=List[schemas.Brand])
 async def list_brands(
     skip: int = 0,
     limit: int = 100,
@@ -50,7 +50,7 @@ async def list_brands(
     result = await db.execute(query)
     return result.scalars().all()
 
-@router.get("/{brand_id}", response_model=schemas.BrandWithCategories)
+@router.get("/{brand_id}", response_model=schemas.Brand)
 async def get_brand(brand_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(models.Brand).filter(models.Brand.id == brand_id)
@@ -61,7 +61,7 @@ async def get_brand(brand_id: int, db: AsyncSession = Depends(get_db)):
     return brand
 
 # UPDATE
-@router.put("/{brand_id}", response_model=schemas.BrandWithCategories)
+@router.put("/{brand_id}", response_model=schemas.Brand)
 async def update_brand(
     brand_id: int,
     brand: schemas.BrandUpdate,
