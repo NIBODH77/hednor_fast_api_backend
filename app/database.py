@@ -1,20 +1,27 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from urllib.parse import urlparse, parse_qs
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql+asyncpg://postgres:nibodh%40123@localhost/odhreceptiondb"
 )
 
+# Clean up URL for asyncpg
 if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://").replace("postgres://", "postgresql+asyncpg://")
-    DATABASE_URL = DATABASE_URL.replace("?sslmode=disable", "").replace("&sslmode=disable", "")
+
+# Remove any sslmode parameters from URL
+if "?" in DATABASE_URL:
+    base_url = DATABASE_URL.split("?")[0]
+    DATABASE_URL = base_url
 
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
-    future=True
+    future=True,
+    connect_args={"ssl": "require"} if "neon.tech" in DATABASE_URL else {}
 )
 
 AsyncSessionLocal = sessionmaker(
