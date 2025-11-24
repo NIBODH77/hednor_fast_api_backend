@@ -1,57 +1,57 @@
 {% extends "base.html" %}
 {% block title %}Edit Employee{% endblock %}
 {% block content %}
-<h2 class="text-2xl font-semibold mb-4">Edit: {{ item.full_name }}</h2>
+<h2 class="text-2xl font-semibold mb-4">Edit Employee{% if item.full_name %}: {{ item.full_name }}{% endif %}</h2>
 
-<form action="/admin/employees/{{ item.id }}/edit" method="post" enctype="multipart/form-data" class="space-y-4 bg-white p-4 rounded-xl">
+<form action="/admin/employees/{{ item.id if item.id else 'new' }}/edit" method="post" enctype="multipart/form-data" class="space-y-4 bg-white p-4 rounded-xl">
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
       <label class="block text-sm">Full Name</label>
-      <input name="full_name" value="{{ item.full_name }}" class="w-full border rounded px-3 py-2">
+      <input name="full_name" value="{{ item.full_name if item.full_name else '' }}" class="w-full border rounded px-3 py-2">
     </div>
     <div>
       <label class="block text-sm">DOB</label>
-      <input type="date" name="dob" value="{{ item.dob }}" class="w-full border rounded px-3 py-2">
+      <input type="date" name="dob" value="{{ item.dob if item.dob else '' }}" class="w-full border rounded px-3 py-2">
     </div>
     <div>
       <label class="block text-sm">Gender</label>
       <select name="gender" class="w-full border rounded px-3 py-2">
         {% for g in ['Male','Female','Other','Prefer not to say'] %}
-          <option {{ 'selected' if item.gender.value==g else '' }}>{{ g }}</option>
+          <option {{ 'selected' if item.gender and item.gender.value==g else '' }}>{{ g }}</option>
         {% endfor %}
       </select>
     </div>
     <div>
       <label class="block text-sm">Phone</label>
-      <input name="phone" value="{{ item.phone }}" class="w-full border rounded px-3 py-2">
+      <input name="phone" value="{{ item.phone if item.phone else '' }}" class="w-full border rounded px-3 py-2">
     </div>
     <div class="sm:col-span-2">
       <label class="block text-sm">Email</label>
-      <input name="email" value="{{ item.email }}" class="w-full border rounded px-3 py-2">
+      <input name="email" value="{{ item.email if item.email else '' }}" class="w-full border rounded px-3 py-2">
     </div>
     <div>
       <label class="block text-sm">Aadhaar</label>
-      <input name="aadhaar_number" value="{{ item.aadhaar_number }}" class="w-full border rounded px-3 py-2">
+      <input name="aadhaar_number" value="{{ item.aadhaar_number if item.aadhaar_number else '' }}" class="w-full border rounded px-3 py-2">
     </div>
     <div>
       <label class="block text-sm">PAN</label>
-      <input name="pan_number" value="{{ item.pan_number or '' }}" class="w-full border rounded px-3 py-2">
+      <input name="pan_number" value="{{ item.pan_number if item.pan_number else '' }}" class="w-full border rounded px-3 py-2">
     </div>
     <div class="sm:col-span-2">
       <label class="block text-sm">Address</label>
-      <textarea name="address" class="w-full border rounded px-3 py-2">{{ item.address }}</textarea>
+      <textarea name="address" class="w-full border rounded px-3 py-2">{{ item.address if item.address else '' }}</textarea>
     </div>
     <div>
       <label class="block text-sm">Emergency Name</label>
-      <input name="emergency_name" value="{{ item.emergency_name }}" class="w-full border rounded px-3 py-2">
+      <input name="emergency_name" value="{{ item.emergency_name if item.emergency_name else '' }}" class="w-full border rounded px-3 py-2">
     </div>
     <div>
       <label class="block text-sm">Emergency Relation</label>
-      <input name="emergency_relation" value="{{ item.emergency_relation }}" class="w-full border rounded px-3 py-2">
+      <input name="emergency_relation" value="{{ item.emergency_relation if item.emergency_relation else '' }}" class="w-full border rounded px-3 py-2">
     </div>
     <div>
       <label class="block text-sm">Emergency Phone</label>
-      <input name="emergency_phone" value="{{ item.emergency_phone }}" class="w-full border rounded px-3 py-2">
+      <input name="emergency_phone" value="{{ item.emergency_phone if item.emergency_phone else '' }}" class="w-full border rounded px-3 py-2">
     </div>
   </div>
 
