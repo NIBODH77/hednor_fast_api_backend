@@ -17,11 +17,18 @@ if "?" in DATABASE_URL:
     base_url = DATABASE_URL.split("?")[0]
     DATABASE_URL = base_url
 
+# Configure SSL for cloud database connections (Neon, AWS RDS, etc.)
+# Use proper SSL verification for production security
+connect_args = {}
+if "neon.tech" in DATABASE_URL or "rds.amazonaws.com" in DATABASE_URL:
+    # For asyncpg, simply use ssl=True to enable SSL with proper certificate validation
+    connect_args = {"ssl": True}
+
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
     future=True,
-    connect_args={"ssl": "require"} if "neon.tech" in DATABASE_URL else {}
+    connect_args=connect_args
 )
 
 AsyncSessionLocal = sessionmaker(

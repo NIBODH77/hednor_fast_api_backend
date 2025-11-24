@@ -17,12 +17,16 @@ async def init_database():
     
     print("Database tables created successfully!")
     
+    # ⚠️ SECURITY: Default admin credentials for initial setup only
+    # IMPORTANT: Change these credentials immediately after first login!
+    # Use the User Management interface to update admin credentials.
     async with AsyncSessionLocal() as db:
         result = await db.execute(select(User).where(User.username == "admin"))
         admin_user = result.scalars().first()
         
         if not admin_user:
             print("Creating default admin user...")
+            print("⚠️  WARNING: Using default credentials - CHANGE IMMEDIATELY after first login!")
             admin = User(
                 username="admin",
                 password_hash=hash_password("admin123"),
@@ -31,6 +35,7 @@ async def init_database():
             db.add(admin)
             await db.commit()
             print("✅ Default admin user created (username: admin, password: admin123)")
+            print("⚠️  SECURITY: Change default credentials via User Management after login!")
         else:
             print("✅ Admin user already exists")
 
