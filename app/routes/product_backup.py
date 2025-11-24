@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from typing import List, Optional
+from sqlalchemy.orm import selectinload
+from typing import List, Optional, Any
 from datetime import datetime
 from pathlib import Path
 import os
@@ -191,7 +192,7 @@ async def create_bulk_products(
     )
 
 # CREATE - Single product via Form
-@router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=schemas.ProductOut, status_code=status.HTTP_201_CREATED)
 async def create_product(
     name: str = Form(...),
     slug: str = Form(...),
@@ -260,26 +261,23 @@ async def create_product(
     await db.commit()
     await db.refresh(db_product)
     
-    return {
-        "id": db_product.id,
-        "name": db_product.name,
-        "slug": db_product.slug,
-        "description": db_product.description,
-        "price": db_product.price,
-        "selling_price": db_product.selling_price,
-        "discount": db_product.discount,
-        "quantity": db_product.quantity,
-        "category_id": db_product.category_id,
-        "brand_id": db_product.brand_id,
-        "is_active": db_product.is_active,
-        "image_url": get_image_url(db_product.image_path),
-        "created_at": db_product.created_at,
-        "updated_at": db_product.updated_at,
-        "message": "Product created successfully"
-    }
+    # Eagerly load relationships to avoid greenlet issues
+    result = await db.execute(
+        select(models.Product)
+        .where(models.Product.id == db_product.id)
+        .options(selectinload(models.Product.category), selectinload(models.Product.brand))
+    )
+    product = result.scalar_one_or_none()
+    
+    return schemas.ProductOut(
+        **product.__dict__,
+        image_url=get_image_url(product.image_path),
+        category=product.category,
+        brand=product.brand
+    )
 
 # READ - List all products
-@router.get("/", response_model=List[dict])
+@router.get("/", response_model=List[schemas.ProductOut])
 async def list_products(
     skip: int = 0,
     limit: int = 100,
@@ -297,36 +295,31 @@ async def list_products(
     if brand_id:
         query = query.filter(models.Product.brand_id == brand_id)
     
-    query = query.offset(skip).limit(limit)
+    query = query.options(
+        selectinload(models.Product.category),
+        selectinload(models.Product.brand)
+    ).offset(skip).limit(limit)
     
     result = await db.execute(query)
     products = result.scalars().all()
     
     return [
-        {
-            "id": p.id,
-            "name": p.name,
-            "slug": p.slug,
-            "description": p.description,
-            "price": p.price,
-            "selling_price": p.selling_price,
-            "discount": p.discount,
-            "quantity": p.quantity,
-            "category_id": p.category_id,
-            "brand_id": p.brand_id,
-            "is_active": p.is_active,
-            "image_url": get_image_url(p.image_path),
-            "created_at": p.created_at,
-            "updated_at": p.updated_at,
-        }
-        for p in products
+        schemas.ProductOut(
+            **product.__dict__,
+            image_url=get_image_url(product.image_path),
+            category=product.category,
+            brand=product.brand
+        )
+        for product in products
     ]
 
 # READ - Get single product
-@router.get("/{product_id}", response_model=dict)
+@router.get("/{product_id}", response_model=schemas.ProductOut)
 async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
-        select(models.Product).filter(models.Product.id == product_id)
+        select(models.Product)
+        .where(models.Product.id == product_id)
+        .options(selectinload(models.Product.category), selectinload(models.Product.brand))
     )
     product = result.scalar_one_or_none()
     
@@ -336,25 +329,15 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
             detail="Product not found"
         )
     
-    return {
-        "id": product.id,
-        "name": product.name,
-        "slug": product.slug,
-        "description": product.description,
-        "price": product.price,
-        "selling_price": product.selling_price,
-        "discount": product.discount,
-        "quantity": product.quantity,
-        "category_id": product.category_id,
-        "brand_id": product.brand_id,
-        "is_active": product.is_active,
-        "image_url": get_image_url(product.image_path),
-        "created_at": product.created_at,
-        "updated_at": product.updated_at,
-    }
+    return schemas.ProductOut(
+        **product.__dict__,
+        image_url=get_image_url(product.image_path),
+        category=product.category,
+        brand=product.brand
+    )
 
 # UPDATE
-@router.put("/{product_id}", response_model=dict)
+@router.put("/{product_id}", response_model=schemas.ProductOut)
 async def update_product(
     product_id: int,
     name: Optional[str] = Form(None),
@@ -371,7 +354,9 @@ async def update_product(
     db: AsyncSession = Depends(get_db)
 ):
     result = await db.execute(
-        select(models.Product).filter(models.Product.id == product_id)
+        select(models.Product)
+        .where(models.Product.id == product_id)
+        .options(selectinload(models.Product.category), selectinload(models.Product.brand))
     )
     product = result.scalar_one_or_none()
     
@@ -414,33 +399,31 @@ async def update_product(
     
     # Handle image
     if image:
+        # Delete old image
         if product.image_path:
             old_path = IMAGE_UPLOAD_DIR / product.image_path
             if old_path.exists():
                 os.remove(old_path)
+        # Save new image
         product.image_path = save_uploaded_image(image)
     
     product.updated_at = datetime.utcnow()
     await db.commit()
-    await db.refresh(product)
     
-    return {
-        "id": product.id,
-        "name": product.name,
-        "slug": product.slug,
-        "description": product.description,
-        "price": product.price,
-        "selling_price": product.selling_price,
-        "discount": product.discount,
-        "quantity": product.quantity,
-        "category_id": product.category_id,
-        "brand_id": product.brand_id,
-        "is_active": product.is_active,
-        "image_url": get_image_url(product.image_path),
-        "created_at": product.created_at,
-        "updated_at": product.updated_at,
-        "message": "Product updated successfully"
-    }
+    # Re-fetch with eager loading to avoid greenlet issues
+    result = await db.execute(
+        select(models.Product)
+        .where(models.Product.id == product_id)
+        .options(selectinload(models.Product.category), selectinload(models.Product.brand))
+    )
+    updated_product = result.scalar_one_or_none()
+    
+    return schemas.ProductOut(
+        **updated_product.__dict__,
+        image_url=get_image_url(updated_product.image_path),
+        category=updated_product.category,
+        brand=updated_product.brand
+    )
 
 # DELETE
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)

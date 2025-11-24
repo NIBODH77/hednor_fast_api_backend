@@ -1,101 +1,166 @@
-# ODH Receptionist Panel
+# Hednor E-Commerce API
 
 ## Overview
 
-The ODH Receptionist Panel is a visitor and employee management system built with FastAPI. It provides role-based access control with separate interfaces for administrators and receptionists to manage visitor check-ins, scheduled appointments, and employee records. The system features session-based authentication and a PostgreSQL database backend.
+A fully asynchronous e-commerce API built with FastAPI and PostgreSQL for managing products, categories, and brands. The API supports both single and bulk product creation with proper validation and error handling. All database operations use async/await patterns for high performance.
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+Preferred communication style: Simple, everyday language. Hinglish support appreciated.
+
+## Recent Changes (Nov 24, 2025)
+
+- **Converted entire project to async**: All routes now use AsyncSession for database operations
+- **Added bulk product creation endpoint**: POST `/api/v1/products/bulk` accepts JSON array of products
+- **Fixed greenlet issues**: Removed lazy-loaded relationship access in responses
+- **All endpoints working**: Single product, bulk product, list, get, update, delete endpoints all functional
+- **Database recreated**: Tables now have proper schema including parent_id for category hierarchy
 
 ## System Architecture
 
 ### Backend Framework
-- **FastAPI**: Modern async web framework chosen for its high performance, automatic API documentation, and native async/await support
-- **Uvicorn**: ASGI server for running the FastAPI application
+- **FastAPI**: Modern async web framework with auto-generated API documentation
+- **Uvicorn**: ASGI server bound to 0.0.0.0:5000
 - **Python 3.12**: Runtime environment
 
 ### Database Layer
-- **SQLAlchemy 2.0**: ORM for database interactions with async support via `AsyncSession`
-- **Alembic**: Database migration management tool for schema versioning
-- **PostgreSQL**: Primary relational database with asyncpg driver for async operations
-- **Connection Strategy**: Async engine with connection pooling, SSL support for cloud databases (Neon, AWS RDS)
+- **SQLAlchemy 2.0**: Async ORM using AsyncSession
+- **AsyncPG**: PostgreSQL async driver for non-blocking operations
+- **PostgreSQL**: Primary database with connection pooling and SSL support
+- **Models**: Category (with parent_id hierarchy), Brand, Product
 
-### Authentication & Security
-- **Session-based Authentication**: Cookie-based sessions instead of JWT tokens for web interface
-- **Passlib + Bcrypt**: Password hashing with bcrypt algorithm (72-byte limit enforced)
-- **Role-based Access Control**: Two user roles - "admin" and "receptionist" with different permission levels
-- **Default Credentials**: Auto-created admin user on first startup (username: admin, password: admin123) - must be changed immediately after first login
+### Project Structure
+```
+app/
+├── main.py              # FastAPI app setup and startup
+├── database.py          # AsyncSession configuration
+├── models.py            # SQLAlchemy models (Category, Brand, Product)
+├── schemas.py           # Pydantic schemas for validation and responses
+└── routes/
+    ├── categories.py    # Category endpoints (list, hierarchy, search)
+    ├── brand.py         # Brand CRUD endpoints
+    └── product.py       # Product CRUD + bulk create endpoints
+start.py                 # Application entry point with async init
+```
 
-### Frontend Architecture
-- **Jinja2 Templates**: Server-side HTML rendering with three template directories:
-  - `frontend/`: Login pages
-  - `frontend/admin/templates/`: Admin dashboard and management interfaces
-  - `frontend/reception/templates/`: Receptionist-specific views
-- **Tailwind CSS**: Utility-first CSS framework via CDN
-- **Font Awesome**: Icon library for UI elements
+### API Endpoints
 
-### Application Structure
-- **Models** (`app/models.py`): SQLAlchemy ORM models for User, Visitor, and Employee entities
-- **CRUD Operations** (`app/crud.py`): Database query functions and business logic
-- **Schemas** (`app/schemas.py`): Pydantic models for data validation
-- **Security** (`app/security.py`): Authentication helpers, password hashing, token creation
-- **Routes**: Modular routing (currently consolidated in `app/main.py`)
-  - Authentication endpoints (login, logout)
-  - Admin routes (user management, employee management, visitor oversight)
-  - Receptionist routes (visitor check-in/out, appointments)
+#### Products
+- `POST /api/v1/products/` - Create single product (Form data)
+- `POST /api/v1/products/bulk` - Create multiple products (JSON array)
+- `GET /api/v1/products/` - List all products with filters
+- `GET /api/v1/products/{id}` - Get single product
+- `PUT /api/v1/products/{id}` - Update product (Form data)
+- `DELETE /api/v1/products/{id}` - Delete product
 
-### Data Models
-- **User**: Authentication and role management (admin/receptionist)
-- **Visitor**: Guest tracking with check-in/out times, contact details, purpose of visit
-- **Employee**: Staff directory with personal details, emergency contacts, documents (Aadhaar, PAN)
+#### Categories
+- `GET /api/v1/categories/top-level` - Get top-level categories
+- `GET /api/v1/categories/{id}/children` - Get category children
+- `GET /api/v1/categories/{id}/hierarchy` - Get category hierarchy (recursive)
+- `GET /api/v1/categories/search` - Search categories by name
 
-### Database Initialization
-- **Startup Process**: `start.py` initializes database tables and creates default admin user
-- **Migration Support**: Alembic configured for schema versioning (migrations present in `alembic/versions/`)
+#### Brands
+- `POST /api/v1/brands/` - Create brand
+- `GET /api/v1/brands/` - List brands
+- `GET /api/v1/brands/{id}` - Get single brand
+- `PUT /api/v1/brands/{id}` - Update brand
+- `DELETE /api/v1/brands/{id}` - Delete brand
 
-## External Dependencies
+### Key Features
 
-### Core Services
-- **PostgreSQL Database**: Async PostgreSQL connection via asyncpg
-  - Default local: `postgresql+asyncpg://postgres:nibodh%40123@localhost/odhreceptiondb`
-  - Supports cloud providers: Neon, AWS RDS with SSL
-  - Environment variable: `DATABASE_URL`
+**Bulk Product Creation**:
+- Accepts JSON array of up to 100 products
+- Validates all categories and brands exist
+- Checks for duplicate slugs
+- Returns detailed success/failure status for each product
+- Atomic transaction: all succeed or appropriate failures reported
 
-### SMS Gateway Integration
-- **SMS Gateway Center**: Third-party SMS service for notifications
-  - Base URL: `https://unify.smsgateway.center/SMSApi/send`
-  - Credentials stored in `app/settings.py`
-  - DLT (Distributed Ledger Technology) template IDs for OTP messages
-  - Used for visitor notifications and OTP verification
+**Async Operations**:
+- All database queries use `await` and AsyncSession
+- No blocking I/O operations
+- Connection pooling enabled
+- SSL support for cloud databases
 
-### Python Package Dependencies
-- **fastapi**: Web framework (v0.104.1+)
-- **uvicorn**: ASGI server with standard extras
-- **sqlalchemy**: ORM (v2.0.23+)
-- **asyncpg**: PostgreSQL async driver
-- **psycopg2-binary**: PostgreSQL adapter (sync fallback)
-- **alembic**: Database migrations
-- **pydantic-settings**: Configuration management
-- **python-jose**: JWT operations (legacy, may be unused)
-- **passlib**: Password hashing
-- **bcrypt**: Bcrypt hashing implementation
-- **python-multipart**: Form data handling
-- **jinja2**: Template engine
-- **email-validator**: Email validation
-- **httpx**: HTTP client for external API calls
-- **python-dateutil**: Date manipulation
-- **pytz**: Timezone support
+**Error Handling**:
+- Proper HTTP status codes
+- Detailed error messages
+- Validation for relationships (category, brand)
+- Duplicate slug detection
 
-### Configuration Management
-- **Pydantic Settings**: Environment-based configuration via `.env` file
-- **Settings Class** (`app/settings.py`): Centralized configuration with defaults
-  - Database URL
-  - SMS gateway credentials
-  - Secret keys (⚠️ default "logan" - should be changed in production)
-  - Debug mode flags
+## Database Schema
 
-### Static Assets
-- **Tailwind CSS**: Loaded via CDN (cdn.tailwindcss.com)
-- **Font Awesome**: Icon library via CDN (v6.4.0)
-- Custom color scheme defined in template headers (primary, secondary, accent colors)
+### Categories Table
+- `id` (int, PK)
+- `name` (varchar)
+- `slug` (varchar, unique)
+- `description` (varchar)
+- `is_active` (boolean)
+- `is_leaf` (boolean)
+- `parent_id` (int, FK to categories.id)
+
+### Brands Table
+- `id` (int, PK)
+- `name` (varchar)
+- `slug` (varchar, unique)
+- `description` (varchar)
+- `is_active` (boolean)
+
+### Products Table
+- `id` (int, PK)
+- `name` (varchar)
+- `slug` (varchar, unique)
+- `description` (varchar)
+- `price` (float)
+- `selling_price` (float)
+- `discount` (float)
+- `quantity` (int)
+- `category_id` (int, FK)
+- `brand_id` (int, FK)
+- `is_active` (boolean)
+- `image_path` (varchar)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
+
+## Testing Commands
+
+```bash
+# Bulk product creation (3 products)
+curl -X POST http://localhost:5000/api/v1/products/bulk \
+  -H "Content-Type: application/json" \
+  -d '[
+    {"name": "Nike Pro", "slug": "nike-pro", "price": 120, "quantity": 50, "category_id": 1, "brand_id": 1},
+    {"name": "Nike Elite", "slug": "nike-elite", "price": 140, "quantity": 75, "category_id": 1, "brand_id": 1}
+  ]'
+
+# Single product (Form data)
+curl -X POST http://localhost:5000/api/v1/products/ \
+  -F "name=Adidas Running" \
+  -F "slug=adidas-running" \
+  -F "price=130" \
+  -F "quantity=60" \
+  -F "category_id=1" \
+  -F "brand_id=1"
+
+# List products
+curl http://localhost:5000/api/v1/products/
+
+# Get API docs
+curl http://localhost:5000/docs
+```
+
+## Dependencies
+
+- fastapi
+- uvicorn
+- sqlalchemy
+- asyncpg
+- psycopg2-binary
+- pydantic
+- python-multipart
+
+## Known Issues & Notes
+
+- Single product endpoint uses Form data (multipart) for image support
+- Bulk product endpoint uses JSON (no image support in bulk)
+- Relationships (category, brand) not included in product responses to avoid greenlet issues
+- Product responses include only basic fields and relationship IDs

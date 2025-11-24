@@ -649,7 +649,35 @@ class ProductBase(BaseModel):
     is_active: bool = True
 
 class ProductCreate(ProductBase):
-    pass
+    selling_price: Optional[float] = None
+    discount: Optional[float] = None
+
+class ProductBulkCreate(BaseModel):
+    """Schema for bulk product creation via JSON"""
+    name: str
+    slug: str
+    description: Optional[str] = None
+    price: float
+    selling_price: Optional[float] = None
+    discount: Optional[float] = None
+    quantity: int = 0
+    category_id: int
+    brand_id: int
+    is_active: bool = True
+
+class BulkProductResult(BaseModel):
+    """Result for each product in bulk operation"""
+    success: bool
+    product_id: Optional[int] = None
+    slug: str
+    error: Optional[str] = None
+
+class BulkProductResponse(BaseModel):
+    """Response for bulk product creation"""
+    total: int
+    created: int
+    failed: int
+    results: List[BulkProductResult]
 
 class ProductOut(ProductBase):
     id: int
