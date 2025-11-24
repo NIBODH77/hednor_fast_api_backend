@@ -18,17 +18,23 @@ if "?" in DATABASE_URL:
     DATABASE_URL = base_url
 
 # Configure SSL for cloud database connections (Neon, AWS RDS, etc.)
-connect_args = {}
+connect_args = {
+    "server_settings": {
+        "application_name": "hednor_ecommerce",
+        "jit": "off"
+    }
+}
 if "neon.tech" in DATABASE_URL or "rds.amazonaws.com" in DATABASE_URL:
-    # For asyncpg, simply use ssl=True to enable SSL with proper certificate validation
-    connect_args = {"ssl": True}
+    connect_args["ssl"] = True
 
-# Create async engine
+# Create async engine with proper configuration
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
     future=True,
-    connect_args=connect_args
+    connect_args=connect_args,
+    pool_pre_ping=True,  # Enable connection health checks
+    pool_recycle=3600,   # Recycle connections after 1 hour
 )
 
 # Create async session factory

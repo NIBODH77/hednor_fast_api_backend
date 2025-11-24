@@ -1,21 +1,13 @@
 import uvicorn
-import asyncio
-from app.database import init_db
+import sys
 
-async def startup():
-    """Initialize database on startup"""
+if __name__ == "__main__":
     print("=" * 50)
     print("Hednor E-Commerce API - Starting...")
     print("=" * 50)
-    await init_db()
-    print("✅ Database initialized successfully!")
-
-if __name__ == "__main__":
-    # Run initialization
-    asyncio.run(startup())
     
-    # Start FastAPI server
-    print("\nStarting FastAPI server on 0.0.0.0:5000...")
+    # Start FastAPI server with uvicorn
+    # Database initialization will happen in app startup event
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
