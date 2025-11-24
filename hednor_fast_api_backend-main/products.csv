@@ -1,0 +1,23 @@
+image_url,name,price,quantity,category_name,brand,is_active,Static: "Edit/Delete"
+samsung_galaxy_s23.jpg,Samsung Galaxy S23,899.99,50,Smartphones,Samsung,Active,Edit/Delete
+iphone_15_pro.jpg,iPhone 15 Pro,1099.99,30,Smartphones,Apple,Active,Edit/Delete
+uploads/products/dell_xps_15.jpg,Dell XPS 15,1499.99,25,Laptops,Dell,Active,Edit/Deletelg_smart_fridge.jpg,LG Smart Refrigerator,2499.99,15,Refrigerators,LG,Active,Edit/Delete/whirlpool_washer.jpg,Whirlpool Washing Machine,899.99,20,Washing Machines,Whirlpool,Active,Edit/Delete
+nike_air_max.jpg,Nike Air Max,129.99,100,Shoes,Nike,Active,Edit/Deletezara_jacket.jpg,Zara Denim Jacket,59.99,75,Clothing,Zara,Active,Edit/Delete
+sony_headphones.jpg,Sony WH-1000XM5,399.99,40,Audio,Sony,Active,Edit/Delete
+hp_spectre.jpg,HP Spectre x360,1299.99,30,Laptops,HP,Active,Edit/Delete
+puma_shoes.jpg,Puma Running Shoes,79.99,80,Shoes,Puma,Active,Edit/Delete
+panasonic_microwave.jpg,Panasonic Microwave,199.99,35,Kitchen Appliances,Panasonic,Active,Edit/Delete
+Bosch Mixer Grinder,149.99,45,Kitchen Appliances,Bosch,Active,Edit/Delete
+adidas_tshirt.jpg,Adidas Sport T-shirt,29.99,120,Clothing,Adidas,Active,Edit/Delete
+lenovo_thinkpad.jpg,Lenovo ThinkPad,999.99,40,Laptops,Lenovo,Active,Edit/Delete
+haier_ac.jpg,Haier Air Conditioner,799.99,25,ACs,Haier,Active,Edit/Delete
+macbook_pro.jpg,MacBook Pro 16-inch,2499.99,20,Laptops,Apple,Active,Edit/Delete
+samsung_tv.jpg,Samsung QLED TV,1499.99,15,Television,Samsung,Active,Edit/Delete
+lg_washer.jpg,LG Washing Machine,1099.99,18,Washing Machines,LG,Active,Edit/Delete
+nike_shorts.jpg,Nike Sport Shorts,39.99,90,Clothing,Nike,Active,Edit/Delete
+zara_dress.jpg,Zara Summer Dress,49.99,60,Clothing,Zara,Active,Edit/Delete
+sony_tv.jpg,Sony Bravia TV,1799.99,12,Television,Sony,Active,Edit/Delete
+puma_bag.jpg,Puma Backpack,45.99,50,Bags,Puma,Active,Edit/Delete
+panasonic_blender.jpg,Panasonic Blender,89.99,30,Kitchen Appliances,Panasonic,Active,Edit/Delete
+adidas_pants.jpg,Adidas Running Pants,49.99,65,Clothing,Adidas,Active,Edit/Delete
+haier_fridge.jpg,Haier Refrigerator,699.99,22,Refrigerators,Haier,Active,Edit/Delete
