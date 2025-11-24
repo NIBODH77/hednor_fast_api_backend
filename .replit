@@ -1,4 +1,4 @@
-modules = ["cpp-clang14", "web", "c-clang14", "python-3.11"]
+modules = ["python-3.12", "web", "cpp-clang14", "c-clang14"]
 [agent]
 expertMode = true
 
