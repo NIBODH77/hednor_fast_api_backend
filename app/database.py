@@ -227,20 +227,17 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
-# Get DATABASE_URL from environment or use SQLite by default
-# Force SQLite if system database (helium) is set
-database_url_env = os.getenv("DATABASE_URL", "")
-if "helium" in database_url_env or not database_url_env:
-    DATABASE_URL = "sqlite+aiosqlite:///./ecommerce.db"
-else:
-    DATABASE_URL = database_url_env
+# PostgreSQL database URL
+DATABASE_URL = "postgresql+asyncpg://postgres:123456789@localhost:5432/hednor_db"
 
-# Create async engine with proper configuration for SQLite
+# Create async engine with proper configuration for PostgreSQL
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
     future=True,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20
 )
 
 # Create async session factory
