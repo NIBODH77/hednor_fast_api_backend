@@ -188,3 +188,15 @@ class Product(ProductBase):
 # Update forward references
 CategoryWithRelationships.model_rebuild()
 BrandWithCategories.model_rebuild()
+
+
+# Category Search Result Schema
+class CategorySearchResult(BaseModel):
+    id: int
+    name: str
+    parent_id: Optional[int] = None
+    level: int
+    path: Optional[str] = None
+    
+    class Config:
+        from_attributes = True
