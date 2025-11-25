@@ -1,41 +1,476 @@
-INFO:     Started reloader process [29528] using WatchFiles
-Process SpawnProcess-1:
-Traceback (most recent call last):
-  File "/usr/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
-    self.run()
-  File "/usr/lib/python3.12/multiprocessing/process.py", line 108, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/nibodh/Documents/hednor_fast_api_backend-main/venv/lib/python3.12/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
-    target(sockets=sockets)
-  File "/home/nibodh/Documents/hednor_fast_api_backend-main/venv/lib/python3.12/site-packages/uvicorn/server.py", line 67, in run
-    return asyncio.run(self.serve(sockets=sockets))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
-    return runner.run(main)
-           ^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
-  File "/home/nibodh/Documents/hednor_fast_api_backend-main/venv/lib/python3.12/site-packages/uvicorn/server.py", line 71, in serve
-    await self._serve(sockets)
-  File "/home/nibodh/Documents/hednor_fast_api_backend-main/venv/lib/python3.12/site-packages/uvicorn/server.py", line 78, in _serve
-    config.load()
-  File "/home/nibodh/Documents/hednor_fast_api_backend-main/venv/lib/python3.12/site-packages/uvicorn/config.py", line 436, in load
-    self.loaded_app = import_from_string(self.app)
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/nibodh/Documents/hednor_fast_api_backend-main/venv/lib/python3.12/site-packages/uvicorn/importer.py", line 19, in import_from_string
-    module = importlib.import_module(module_str)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
-  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
-  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
-  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
-  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
-  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
-  File "/home/nibodh/Documents/hednor_fast_api_backend-main/app/main.py", line 387, in <module>
-    from app.database import engine, init_db, Base
-ImportError: cannot import name 'init_db' from 'app.database' (/home/nibodh/Documents/hednor_fast_api_backend-main/app/database.py)
+# # # # from fastapi import FastAPI
+# # # # from fastapi.middleware.cors import CORSMiddleware
+# # # # from app import models
+# # # # from app.database import engine
+# # # # from app.routes import product,category
+# # # # from fastapi.staticfiles import StaticFiles
+# # # # from fastapi.responses import FileResponse
+
+# # # # # Create database tables (if not using Alembic)
+# # # # models.Base.metadata.create_all(bind=engine)
+
+# # # # # Initialize FastAPI app
+# # # # app = FastAPI(
+# # # #     title="E-Commerce Product API",
+# # # #     description="API to manage products, images, and variants.",
+# # # #     version="1.0.0"
+# # # # )
+
+# # # # # CORS Configuration (allow frontend access)
+
+# # # # app.add_middleware(
+# # # #     CORSMiddleware,
+# # # #     allow_origins=["http://localhost:3000"],
+# # # #     allow_credentials=True,
+# # # #     allow_methods=["*"],
+# # # #     allow_headers=["*"],
+# # # # )
+
+
+# # # # # Include product-related routes
+# # # # app.include_router(product.router)
+# # # # app.include_router(category.router)  # ← register it
+
+
+
+# # # # @app.get("/")
+# # # # def read_root():
+# # # #     return {"message": "Hello, FastAPI!"}
+
+
+# # # # @app.get("/favicon.ico", include_in_schema=False)
+# # # # async def favicon():
+# # # #     return FileResponse("static/favicon.ico")
+
+
+
+# # # # from fastapi import FastAPI
+# # # # from fastapi.middleware.cors import CORSMiddleware
+# # # # from fastapi.staticfiles import StaticFiles
+# # # # from fastapi.responses import FileResponse, JSONResponse
+# # # # import os
+
+# # # # from app import models
+# # # # from app.database import engine
+# # # # from app.config import settings  # Updated import
+# # # # from fastapi import FastAPI
+# # # # from fastapi.staticfiles import StaticFiles
+# # # # from pathlib import Path
+# # # # import os
+
+
+# # # # from fastapi import FastAPI
+# # # # from .database import engine
+# # # # from . import models
+# # # # from .routes import category, brand, product
+
+# # # # # Create database tables
+# # # # models.Base.metadata.create_all(bind=engine)
+
+# # # # app = FastAPI(
+# # # #     title="E-Commerce API",
+# # # #     description="API for managing e-commerce categories, brands, and products",
+# # # #     version="1.0.0"
+# # # # )
+
+
+# # # # # Configure CORS middleware
+# # # # app.add_middleware(
+# # # #     CORSMiddleware,
+# # # #     allow_origins=settings.CORS_ORIGINS,  # Now comes from settings
+# # # #     allow_credentials=True,
+# # # #     allow_methods=["GET", "POST", "PUT", "DELETE"],
+# # # #     allow_headers=["*"],
+# # # # )
+
+# # # # @app.get("/")
+# # # # def root():
+# # # #     return {"message": "E-Commerce API is running"}
+
+
+# # # #  # Configure static files
+# # # # def setup_static_files():
+# # # #     static_dir = Path(__file__).parent / "static"
+# # # #     try:
+# # # #         static_dir.mkdir(exist_ok=True)
+# # # #         app.mount("/static", StaticFiles(directory=static_dir), name="static")
+# # # #     except Exception as e:
+# # # #         print(f"Static files setup error: {e}")
+
+# # # # setup_static_files()
+
+
+# # # # # # Include API routes
+# # # # # app.include_router(
+# # # # #     product.router,
+# # # # #     prefix="/api/v1",
+# # # # #     tags=["Products"]
+# # # # # )
+
+# # # # # # app.include_router(
+# # # # # #     category.router,
+# # # # # #     prefix="/api/v1",  # Optional prefix
+# # # # # #     tags=["Categories"]
+# # # # # # )
+
+
+# # # # # Include routers
+# # # # app.include_router(category.router)
+# # # # app.include_router(brand.router)
+# # # # app.include_router(product.router)
+
+
+
+# # # # # Health check endpoint
+# # # # @app.get("/", include_in_schema=False)
+# # # # def health_check():
+# # # #     return {"status": "healthy", "version": app.version}
+
+
+
+# # # # # Favicon endpoint
+# # # # @app.get("/favicon.ico", include_in_schema=False)
+# # # # async def favicon():
+# # # #     favicon_path = os.path.join("static", "favicon.ico")
+# # # #     if os.path.exists(favicon_path):
+# # # #         return FileResponse(favicon_path)
+# # # #     return {"message": "No favicon found"}
+
+
+
+# # # # # Custom exception handler (example)
+# # # # @app.exception_handler(404)
+# # # # async def not_found_exception_handler(request, exc):
+# # # #     return JSONResponse(
+# # # #         status_code=404,
+# # # #         content={"message": "The requested resource was not found"},
+# # # #     )
+
+
+
+# # # from fastapi import FastAPI, Request
+# # # from fastapi.middleware.cors import CORSMiddleware
+# # # from fastapi.staticfiles import StaticFiles
+# # # from fastapi.responses import FileResponse, JSONResponse
+# # # from pathlib import Path
+# # # import os
+
+# # # from app import models
+# # # from app.database import engine
+# # # from app.config import settings
+# # # from app.routes import category, brand, product
+
+# # # # Create database tables
+
+# # # from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
+# # # from sqlalchemy.orm import Session
+# # # import shutil
+# # # import os
+# # # from datetime import datetime
+# # # from typing import Optional
+# # # from . import models, schemas
+# # # from .database import get_db
+# # # import logging
+# # # from fastapi.staticfiles import StaticFiles
+
+
+
+
+
+# # # # Create database tables
+# # # models.Base.metadata.create_all(bind=engine)
+
+# # # app = FastAPI(
+# # #     title="E-Commerce API",
+# # #     description="API for managing e-commerce categories, brands, and products",
+# # #     version="1.0.0"
+# # # )
+
+
+# # # app.mount("/uploads",StaticFiles(directory="uploads"), name="uploads")
+
+# # # # CORS Middleware
+# # # app.add_middleware(
+# # #     CORSMiddleware,
+# # #     allow_origins=settings.CORS_ORIGINS,
+# # #     allow_credentials=True,
+# # #     allow_methods=["GET", "POST", "PUT", "DELETE"],
+# # #     allow_headers=["*"],
+# # # )
+
+
+
+# # # # API Routes
+# # # app.include_router(category.router )
+# # # app.include_router(brand.router)
+# # # app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# # # app.include_router(product.router)
+
+# # # # Static Files Setup
+# # # def setup_static_files():
+# # #     static_dir = Path(__file__).parent / "static"
+# # #     try:
+# # #         static_dir.mkdir(exist_ok=True)
+# # #         app.mount("/static", StaticFiles(directory=static_dir), name="static")
+# # #     except Exception as e:
+# # #         print(f"Static files setup error: {e}")
+
+# # # setup_static_files()
+
+# # # # Root and Health Check
+# # # @app.get("/", include_in_schema=False)
+# # # def health_check():
+# # #     return {"status": "healthy", "version": app.version}
+
+# # # # Favicon Endpoint
+# # # @app.get("/favicon.ico", include_in_schema=False)
+# # # async def favicon():
+# # #     favicon_path = os.path.join("static", "favicon.ico")
+# # #     if os.path.exists(favicon_path):
+# # #         return FileResponse(favicon_path)
+# # #     return JSONResponse(content={"message": "No favicon found"}, status_code=404)
+
+# # # # Exception Handler
+# # # @app.exception_handler(404)
+# # # async def not_found_exception_handler(request: Request, exc):
+# # #     return JSONResponse(
+# # #         status_code=404,
+# # #         content={"message": "The requested resource was not found"},
+# # #     )
+
+
+
+
+
+
+
+
+
+
+# # from fastapi import FastAPI, Request
+# # from fastapi.middleware.cors import CORSMiddleware
+# # from fastapi.staticfiles import StaticFiles
+# # from fastapi.responses import FileResponse, JSONResponse
+# # from pathlib import Path
+# # import os
+# # import logging
+
+# # from app import models
+# # from app.database import engine
+# # from app.config import settings
+# # from app.routes import category, brand, product
+
+
+# # # Initialize logger
+# # logger = logging.getLogger(__name__)
+# # logging.basicConfig(level=logging.INFO)
+
+# # def create_app():
+# #     # Create database tables
+# #     models.Base.metadata.create_all(bind=engine)
+
+# #     app = FastAPI(
+# #         title="E-Commerce API",
+# #         description="API for managing e-commerce categories, brands, and products",
+# #         version="1.0.0",
+# #         docs_url="/docs",
+# #         redoc_url="/redoc"
+# #     )
+
+# #     # Setup middleware
+# #     app.add_middleware(
+# #         CORSMiddleware,
+# #         allow_origins=settings.CORS_ORIGINS,
+# #         allow_credentials=True,
+# #         allow_methods=["*"],
+# #         allow_headers=["*"],
+# #     )
+
+# #     # Create uploads directory if it doesn't exist
+# #     settings.IMAGE_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+# #     # Mount static files
+# #     # app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+
+# #     # Include routers
+# #     app.include_router(category.router, prefix="/api/v1")
+# #     # app.include_router(brand.router, prefix="/api/v1")
+# #     # app.include_router(product.router, prefix="/api/v1")
+
+# #     # Health check endpoint
+# #     @app.get("/", include_in_schema=False)
+# #     async def health_check():
+# #         return {
+# #             "status": "healthy",
+# #             "version": app.version,
+# #             "environment": settings.ENVIRONMENT if hasattr(settings, 'ENVIRONMENT') else "development"
+# #         }
+
+# #     # Favicon endpoint
+# #     @app.get("/favicon.ico", include_in_schema=False)
+# #     async def favicon():
+# #         favicon_path = Path("static") / "favicon.ico"
+# #         if favicon_path.exists():
+# #             return FileResponse(favicon_path)
+# #         return JSONResponse(
+# #             content={"message": "No favicon found"}, 
+# #             status_code=404
+# #         )
+
+# #     # Exception handler
+# #     @app.exception_handler(404)
+# #     async def not_found_handler(request: Request, exc):
+# #         return JSONResponse(
+# #             status_code=404,
+# #             content={"message": "Resource not found"},
+# #         )
+
+# #     @app.exception_handler(500)
+# #     async def server_error_handler(request: Request, exc):
+# #         logger.error(f"Server error: {exc}")
+# #         return JSONResponse(
+# #             status_code=500,
+# #             content={"message": "Internal server error"},
+# #         )
+
+# #     return app
+# # app = create_app()
+
+
+
+
+# # app/main.py
+# from fastapi import FastAPI
+# from fastapi.middleware.cors import CORSMiddleware
+# from .database import engine
+# from . import models,schemas
+# from .routes import categories  # This imports from routers/categories.py
+
+# app = FastAPI()
+
+# # Setup CORS
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["http://localhost:3000"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# # Create database tables
+# models.Base.metadata.create_all(bind=engine)
+
+# # Include routers
+# app.include_router(
+#     categories.router,
+#     prefix="/api/v1",
+#     tags=["categories"]
+# )
+
+# @app.get("/")
+# def read_root():
+#     return {"message": "Welcome to the Category API"}
+
+
+
+
+
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+from pathlib import Path
+import logging
+
+from app.database import engine, init_db, Base
+from app import models  # Import models so Base.metadata knows about them
+from app.routes import categories, brand, product
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Create FastAPI app
+app = FastAPI(
+    title="Hednor E-Commerce API",
+    description="API for managing e-commerce products, categories, and brands",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+# Setup CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Create uploads directory if it doesn't exist
+Path("uploads/products").mkdir(parents=True, exist_ok=True)
+
+# Mount static files for product images
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# Include API routers
+app.include_router(
+    categories.router,
+    prefix="/api/v1",
+    tags=["Categories"]
+)
+
+app.include_router(
+    brand.router,
+    prefix="/api/v1", 
+    tags=["Brands"]
+)
+
+app.include_router(
+    product.router,
+    prefix="/api/v1",
+    tags=["Products"]
+)
+
+# Health check endpoint
+@app.get("/", tags=["Health"])
+async def health_check():
+    return {
+        "status": "healthy",
+        "message": "Hednor E-Commerce API is running",
+        "version": app.version
+    }
+
+# Favicon endpoint
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return JSONResponse(
+        content={"message": "No favicon configured"},
+        status_code=404
+    )
+
+# Error handlers
+@app.exception_handler(404)
+async def not_found_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={"message": "Resource not found"},
+    )
+
+@app.exception_handler(500)
+async def server_error_handler(request, exc):
+    logger.error(f"Server error: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal server error"},
+    )
+
+# Startup event
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Initializing database...")
+    await init_db()
+    logger.info("Database initialized successfully!")
